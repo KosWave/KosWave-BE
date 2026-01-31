@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('koswave-be:server');
+var debug = require('debug')('cheatsol-be:server');
 var http = require('http');
 
 /**
@@ -25,7 +25,14 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
+server.listen(port, ()=>{
+  console.log(`
+  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+  ┃   Server listening on port: ${port}    ┃
+  ┃     http://localhost:${port}/          ┃
+  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+  `)
+});
 server.on('error', onError);
 server.on('listening', onListening);
 
