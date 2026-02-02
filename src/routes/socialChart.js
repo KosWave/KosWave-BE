@@ -2,6 +2,12 @@ const { default: axios } = require("axios");
 const express = require("express");
 const router = express.Router();
 const googleTrends = require("google-trends-api");
+
+if (googleTrends.options) {
+  googleTrends.options.headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  };
+}
 const cacheController = require("../controllers/CacheController");
 
 router.get("/google", async (req, res) => {
@@ -32,11 +38,7 @@ router.get("/google", async (req, res) => {
         keyword: keyword,
         startTime: startDate,
         endTime: new Date(),
-      }, {
-  // 추가 옵션
-  headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-  } });
+      });
       await cacheController.updateCache(keyword, social, start, data);
       cache = await cacheController.getCache(keyword, social, start);
     }
