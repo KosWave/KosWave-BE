@@ -39,15 +39,36 @@ jobs:
           docker push \
             ${{ secrets.NCR_REGISTRY }}/team3-back:latest
 
-      # 6. VM 접속 후 Docker 이미지 Pull & 실행
-      - name: Deploy on Naver Cloud VM
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          port: 22
-          script: |
+      # 6. Bastion을 통한 VM 배포
+      - name: Deploy via Bastion Host
+        run: |
+          # SSH 키 설정
+          mkdir -p ~/.ssh
+          
+          # 줄바꿈 문제 해결 (tr -d '\r' 추가)
+          echo "${{ secrets.BASTION_SSH_KEY }}" | tr -d '\r' > ~/.ssh/bastion_key
+          echo "${{ secrets.BACKEND_SSH_KEY }}" | tr -d '\r' > ~/.ssh/backend_key
+          
+          chmod 600 ~/.ssh/bastion_key ~/.ssh/backend_key
+          
+          # SSH Config 설정
+          cat > ~/.ssh/config <<EOF
+          Host bastion
+            HostName ${{ secrets.BASTION_HOST }}
+            User ${{ secrets.BASTION_USER }}
+            IdentityFile ~/.ssh/bastion_key
+            StrictHostKeyChecking no
+          
+          Host backend
+            HostName ${{ secrets.BACKEND_PRIVATE_IP }}
+            User ${{ secrets.BACKEND_USER }}
+            IdentityFile ~/.ssh/backend_key
+            ProxyJump bastion
+            StrictHostKeyChecking no
+          EOF
+          
+          # 배포 스크립트 실행
+          ssh backend << 'ENDSSH'
             # NCR 로그인
             echo "${{ secrets.NCR_SECRET_KEY }}" | docker login \
               ${{ secrets.NCR_REGISTRY }} \
@@ -61,6 +82,7 @@ jobs:
             # 최신 이미지 Pull
             docker pull \
               ${{ secrets.NCR_REGISTRY }}/team3-back:latest
+
             # 컨테이너 실행
             docker run -d \
               --name koswave-be \
@@ -68,3 +90,4 @@ jobs:
               -p 3000:3000 \
               --restart always \
               ${{ secrets.NCR_REGISTRY }}/team3-back:latest
+          ENDSSH
