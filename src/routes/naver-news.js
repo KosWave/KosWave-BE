@@ -2,68 +2,57 @@ const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 const cacheController = require("../controllers/CacheController");
+require("dotenv").config(); // dotenv 설정 불러오기
 
-router.post("/", async (req, res) => {
-  const body = req.body;
+router.get("/", async (req, res) => {
+  const queryData = req.query;
   const period = 0;
   const social = "naver-news";
-  console.log("naver news : " + JSON.stringify(body));
 
-  try {
-    const keyword = body.keyword;
+  try { 
+    const keyword = queryData.keyword;
     let cache = await cacheController.getCache(keyword, social, period);
 
     if (cache === null || cache === undefined) {
-      const data = JSON.stringify(await getNaverNews(body));
+      const data = JSON.stringify(await getNaverNews(keyword));
       await cacheController.setCache(keyword, social, period, data);
       cache = await cacheController.getCache(keyword, social, period);
     }
     if (cacheController.isExpired(cache)) {
-      const data = JSON.stringify(await getNaverNews(body));
+      const data = JSON.stringify(await getNaverNews(keyword));
       await cacheController.updateCache(keyword, social, period, data);
       cache = await cacheController.getCache(keyword, social, period);
     }
 
     let respdata = JSON.parse(cache.dataValues.data);
 
-    // 최신순으로 정렬
-    respdata = respdata.sort((a, b) => {
-      const dateA = new Date(
-        `${a.documentDate.slice(0, 4)}-${a.documentDate.slice(
-          4,
-          6
-        )}-${a.documentDate.slice(6, 8)}T${a.documentDate.slice(
-          8,
-          10
-        )}:${a.documentDate.slice(10, 12)}:${a.documentDate.slice(12, 14)}`
-      );
-      const dateB = new Date(
-        `${b.documentDate.slice(0, 4)}-${b.documentDate.slice(
-          4,
-          6
-        )}-${b.documentDate.slice(6, 8)}T${b.documentDate.slice(
-          8,
-          10
-        )}:${b.documentDate.slice(10, 12)}:${b.documentDate.slice(12, 14)}`
-      );
-      return dateB - dateA;
-    });
-
-    res.json(respdata.slice(0, 20));
+    res.json(respdata);
   } catch (error) {
     console.error(error);
     res.status(500).send("Error fetching data");
   }
 });
 
-async function getNaverNews(data) {
-  const baseURL =
-    "https://some.co.kr/sometrend/analysis/composite/v2/documents/score";
+async function getNaverNews(query) {
+  const baseURL = "https://openapi.naver.com/v1/search/news.json";
+
   try {
-    const response = await axios.post(baseURL, data);
-    let respdata = response.data.item["ko.news"];
-    return respdata;
+    const response = await axios.get(baseURL, {
+      params: {
+        query: query,     // 검색어
+        display: 10,      // 한 번에 표시할 검색 결과 개수
+        start: 1,         // 검색 시작 위치
+        sort: 'sim'       // 정렬 옵션: sim (유사도순), date (날짜순)
+      },
+      headers: {
+        'X-Naver-Client-Id': process.env.NAVER_ID,
+        'X-Naver-Client-Secret': process.env.NAVER_SECRET
+      }
+    });
+    return response.data.items;
+
   } catch (err) {
+    console.error("API 요청 중 오류 발생:", err.response ? err.response.data : err.message);
     throw err;
   }
 }
