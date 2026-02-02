@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('cheatsol-be:server');
+var debug = require('debug')('koswave-be:server');
 var http = require('http');
 
 /**

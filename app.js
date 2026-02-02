@@ -22,6 +22,21 @@ var naverNewsRouter = require("./src/routes/naver-news");
 var instaNewsRouter = require("./src/routes/instagram-news");
 const http = require("http");
 var app = express();
+
+const cors = require("cors");
+
+app.use(cors({
+  origin: [
+    "http://team3-bucket-front.s3-website.kr.object.fin-ncloudstorage.com",
+    "http://localhost:5173"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
+
+app.options("*", cors());
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
