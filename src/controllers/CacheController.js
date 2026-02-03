@@ -100,6 +100,7 @@ function isValidData(data) {
         trimmed.includes('<!DOCTYPE') ||
         trimmed.includes('<html') ||
         trimmed.includes('Error 401') ||
+        data.includes('Error') ||
         trimmed.includes('Error 400') ||
         trimmed.includes('Error 403') ||
         trimmed.includes('Error 404') ||
