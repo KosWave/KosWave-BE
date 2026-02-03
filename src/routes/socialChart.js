@@ -24,8 +24,9 @@ router.get("/google", async (req, res) => {
         startTime: startDate,
         endTime: new Date(),
       });
-      await cacheController.setCache(keyword, social, start, data);
-      cache = await cacheController.getCache(keyword, social, start);
+      const res = await cacheController.setCache(keyword, social, start, data);
+      if(!res) cache = data;
+      else cache = await cacheController.getCache(keyword, social, start);
     }
     if (cacheController.isExpired(cache)) {
       const data = await googleTrends.interestOverTime({
@@ -33,8 +34,9 @@ router.get("/google", async (req, res) => {
         startTime: startDate,
         endTime: new Date(),
       });
-      await cacheController.updateCache(keyword, social, start, data);
-      cache = await cacheController.getCache(keyword, social, start);
+      const res = await cacheController.updateCache(keyword, social, start, data);
+      if(!res) cache = data;
+      else cache = await cacheController.getCache(keyword, social, start);
     }
 
     const results = cache.dataValues;
@@ -67,7 +69,8 @@ router.get("/youtube", async (req, res) => {
         property: "youtube",
       });
 
-      await cacheController.setCache(keyword, social, start, data);
+      const res = await cacheController.setCache(keyword, social, start, data);
+      if(!res) cache = data;
       cache = await cacheController.getCache(keyword, social, start);
     }
     if (cacheController.isExpired(cache)) {
@@ -78,7 +81,8 @@ router.get("/youtube", async (req, res) => {
         property: "youtube",
       });
 
-      await cacheController.updateCache(keyword, social, start, data);
+      const res = await cacheController.updateCache(keyword, social, start, data);
+      if(!res) cache = data;
       cache = await cacheController.getCache(keyword, social, start);
     }
 

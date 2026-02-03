@@ -9,19 +9,21 @@ router.get("/", async (req, res) => {
   const period = 0;
   const social = "naver-news";
 
-  try { 
+  try {
     const keyword = queryData.keyword;
     let cache = await cacheController.getCache(keyword, social, period);
 
     if (cache === null || cache === undefined) {
       const data = JSON.stringify(await getNaverNews(keyword));
-      await cacheController.setCache(keyword, social, period, data);
-      cache = await cacheController.getCache(keyword, social, period);
+      const result = await cacheController.setCache(keyword, social, period, data);
+      if (!result) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
+      else cache = await cacheController.getCache(keyword, social, period);
     }
     if (cacheController.isExpired(cache)) {
       const data = JSON.stringify(await getNaverNews(keyword));
-      await cacheController.updateCache(keyword, social, period, data);
-      cache = await cacheController.getCache(keyword, social, period);
+      const result = await cacheController.updateCache(keyword, social, period, data);
+      if (!result) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
+      else cache = await cacheController.getCache(keyword, social, period);
     }
 
     let respdata = JSON.parse(cache.dataValues.data);

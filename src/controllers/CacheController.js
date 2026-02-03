@@ -32,6 +32,8 @@ async function setCache(keyword, social, period, data) {
     period: period,
     data: data,
   });
+
+  return true;
 }
 
 async function updateCache(keyword, social, period, data) {
@@ -54,6 +56,8 @@ async function updateCache(keyword, social, period, data) {
       },
     }
   );
+
+  return true;
 }
 
 function isExpired(cache) {
@@ -76,7 +80,7 @@ function isValidData(data) {
   }
   
   // 문자열 "null", "undefined" 체크
-  if (data === "null" || data === "undefined" || data === "[]") {
+  if (data === "null" || data === "undefined" || data === "[]" || data.includes('{"default":{"timelineData":[],"averages":[]}}')) {
     console.log("정상적이지 않은 값 캐싱 방지 - 문자열 null");
     return false;
   }
@@ -92,9 +96,9 @@ function isValidData(data) {
     const trimmed = data.trim();
     
     // HTML 응답 감지 (가장 확실한 방법)
-    if (trimmed.startsWith('<') || 
+    if (
         trimmed.includes('<!DOCTYPE') ||
-        trimmed.includes('html') ||
+        trimmed.includes('<html') ||
         trimmed.includes('Error 401') ||
         trimmed.includes('Error 400') ||
         trimmed.includes('Error 403') ||

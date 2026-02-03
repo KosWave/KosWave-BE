@@ -14,13 +14,15 @@ router.get("/", async (req, res) => {
 
     if (cache === null || cache === undefined) {
       const data = JSON.stringify(await getGoogleNews(keyword));
-      await cacheController.setCache(keyword, SOCIAL, PERIOD, data);
-      cache = await cacheController.getCache(keyword, SOCIAL, PERIOD);
+      const result = await cacheController.setCache(keyword, SOCIAL, PERIOD, data);
+      if (!result) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
+      else cache = await cacheController.getCache(keyword, SOCIAL, PERIOD);
     }
     if (cacheController.isExpired(cache)) {
       const data = JSON.stringify(await getGoogleNews(keyword));
-      await cacheController.updateCache(keyword, SOCIAL, PERIOD, data);
-      cache = await cacheController.getCache(keyword, SOCIAL, PERIOD);
+      const result = await cacheController.updateCache(keyword, SOCIAL, PERIOD, data);
+      if (!result) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
+      else cache = await cacheController.getCache(keyword, SOCIAL, PERIOD);
     }
 
     const newsItems = JSON.parse(cache.dataValues.data);

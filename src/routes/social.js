@@ -12,14 +12,16 @@ router.get("/instagram", async (req, res, next) => {
     if (cache === null || cache === undefined) {
       const instagram = await getInstagramInfo(keyword);
       const data = JSON.stringify(instagram);
-      await cacheController.setCache(keyword, social, 0, data);
-      cache = await cacheController.getCache(keyword, social, 0);
+      const result = await cacheController.setCache(keyword, social, 0, data);
+      if (!result) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
+      else cache = await cacheController.getCache(keyword, social, 0);
     }
     if (cacheController.isExpired(cache)) {
       const instagram = await getInstagramInfo(keyword);
       const data = JSON.stringify(instagram);
-      await cacheController.updateCache(keyword, social, 0, data);
-      cache = await cacheController.getCache(keyword, social, 0);
+      const result = await cacheController.updateCache(keyword, social, 0, data);
+      if (!result) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
+      else cache = await cacheController.getCache(keyword, social, 0);
     }
 
     console.log("dddddd", cache.dataValues.data);
