@@ -19,6 +19,7 @@ async function getCache(keyword, social, period) {
 }
 
 async function setCache(keyword, social, period, data) {
+  console.log("cache : " + data + " " + isValidData(data));
 
   if(!isValidData(data)) {
     console.log("데이터 이상 캐싱 탐지")
@@ -34,6 +35,7 @@ async function setCache(keyword, social, period, data) {
 }
 
 async function updateCache(keyword, social, period, data) {
+  console.log("cache : " + data + " " + isValidData(data));
     if(!isValidData(data)) {
     console.log("데이터 이상 캐싱 탐지")
     return false;
@@ -97,7 +99,8 @@ function isValidData(data) {
         trimmed.includes('Error 400') ||
         trimmed.includes('Error 403') ||
         trimmed.includes('Error 404') ||
-        trimmed.includes('Error 500')) {
+        trimmed.includes('Error 500') ||
+        trimmed.includes('더미데이터')) {
       console.log("❌ 캐싱 방지: HTML/에러 응답 감지");
       return false;
     }
