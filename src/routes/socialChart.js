@@ -25,7 +25,7 @@ router.get("/google", async (req, res) => {
         endTime: new Date(),
       });
       const res = await cacheController.setCache(keyword, social, start, data);
-      if(!res) cache = data;
+      if (!res) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
       else cache = await cacheController.getCache(keyword, social, start);
     }
     if (cacheController.isExpired(cache)) {
@@ -35,7 +35,7 @@ router.get("/google", async (req, res) => {
         endTime: new Date(),
       });
       const res = await cacheController.updateCache(keyword, social, start, data);
-      if(!res) cache = data;
+      if (!res) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
       else cache = await cacheController.getCache(keyword, social, start);
     }
 
@@ -70,7 +70,7 @@ router.get("/youtube", async (req, res) => {
       });
 
       const res = await cacheController.setCache(keyword, social, start, data);
-      if(!res) cache = data;
+      if (!res) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
       cache = await cacheController.getCache(keyword, social, start);
     }
     if (cacheController.isExpired(cache)) {
@@ -82,7 +82,7 @@ router.get("/youtube", async (req, res) => {
       });
 
       const res = await cacheController.updateCache(keyword, social, start, data);
-      if(!res) cache = data;
+      if (!res) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
       cache = await cacheController.getCache(keyword, social, start);
     }
 
@@ -114,14 +114,16 @@ router.post("/naver", async (req, res) => {
     if (cache === null || cache === undefined) {
       const data = JSON.stringify(await getNaverChart(requestBody));
 
-      await cacheController.setCache(keyword, social, periodOffset, data);
-      cache = await cacheController.getCache(keyword, social, periodOffset);
+      const res = await cacheController.setCache(keyword, social, periodOffset, data);
+      if (!res) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
+      else cache = await cacheController.getCache(keyword, social, periodOffset);
     }
     if (cacheController.isExpired(cache)) {
       const data = JSON.stringify(await getNaverChart(requestBody));
 
-      await cacheController.updateCache(keyword, social, periodOffset, data);
-      cache = await cacheController.getCache(keyword, social, periodOffset);
+      const res = await cacheController.updateCache(keyword, social, periodOffset, data);
+      if (!res) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
+      else cache = await cacheController.getCache(keyword, social, periodOffset);
     }
 
     const results = JSON.parse(cache.dataValues.data);
