@@ -27,6 +27,7 @@ async function setCache(keyword, social, period, data) {
     return false;
   }
 
+  console.log("확인용 ");
   await db.Cache.create({
     keyword: keyword,
     social: social,
@@ -46,6 +47,7 @@ async function updateCache(keyword, social, period, data) {
     return false;
   }
 
+  console.log("확인용 ");
   await db.Cache.update(
     {
       data: data,
