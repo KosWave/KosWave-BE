@@ -10,13 +10,13 @@ router.get("/instagram", async (req, res, next) => {
     const social = "insta-info";
     let cache = await cacheController.getCache(keyword, social, 0);
     if (cache === null || cache === undefined) {
-      const instagram = await getInstagramInfo(req.query.word);
+      const instagram = await getInstagramInfo(keyword);
       const data = JSON.stringify(instagram);
       await cacheController.setCache(keyword, social, 0, data);
       cache = await cacheController.getCache(keyword, social, 0);
     }
     if (cacheController.isExpired(cache)) {
-      const instagram = await getInstagramInfo(req.query.word);
+      const instagram = await getInstagramInfo(keyword);
       const data = JSON.stringify(instagram);
       await cacheController.updateCache(keyword, social, 0, data);
       cache = await cacheController.getCache(keyword, social, 0);
@@ -26,7 +26,7 @@ router.get("/instagram", async (req, res, next) => {
     let insta = JSON.parse(cache.dataValues.data);
     res.status(200).json(insta);
   } catch (error) {
-    res.status(400).json({ b: 1 });
+    res.status(400).json({ "error": error });
   }
 });
 
