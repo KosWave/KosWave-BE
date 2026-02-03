@@ -71,7 +71,7 @@ router.get("/youtube", async (req, res) => {
 
       const res = await cacheController.setCache(keyword, social, start, data);
       if (!res) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
-      cache = await cacheController.getCache(keyword, social, start);
+      else cache = await cacheController.getCache(keyword, social, start);
     }
     if (cacheController.isExpired(cache)) {
       const data = await googleTrends.interestOverTime({
@@ -83,7 +83,7 @@ router.get("/youtube", async (req, res) => {
 
       const res = await cacheController.updateCache(keyword, social, start, data);
       if (!res) cache = { dataValues: { data: data } }; // 캐시 실패 시 임시 구조
-      cache = await cacheController.getCache(keyword, social, start);
+      else cache = await cacheController.getCache(keyword, social, start);
     }
 
     const results = cache.dataValues;
