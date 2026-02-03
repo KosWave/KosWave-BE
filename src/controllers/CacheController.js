@@ -66,6 +66,7 @@ function isExpired(cache) {
 }
 
 function isValidData(data) {
+
   // null, undefined 체크
   if (data == null) {
     console.log("정상적이지 않은 값 캐싱 방지 - null/undefined");
@@ -98,8 +99,9 @@ function isValidData(data) {
         trimmed.includes('Error 404') ||
         trimmed.includes('Error 500')) {
       console.log("❌ 캐싱 방지: HTML/에러 응답 감지");
-      return true;
+      return false;
     }
+  }
   
   // 빈 객체 체크
   if (typeof data === 'object' && Object.keys(data).length === 0) {
